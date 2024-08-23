@@ -23,8 +23,9 @@ from docx.shared import Pt
 class init:
     def main():
         load_dotenv()
-    
-    def markdown_para_docx(markdown_texto, caminho_saida):
+
+class diagnostic:
+      def markdown_para_docx(markdown_texto, caminho_saida):
         # Converte o markdown para HTML
         html_texto = markdown2.markdown(markdown_texto)
         
@@ -32,40 +33,40 @@ class init:
         documento = Document()
         
         # Adiciona conteúdo ao documento com formatação
-        adicionar_html_ao_documento(documento, html_texto)
+        diagnostic.adicionar_html_ao_documento(documento, html_texto)
         
         # Salva o documento no caminho especificado
         documento.save(caminho_saida)
 
-def adicionar_html_ao_documento(documento, html_texto):
-    soup = BeautifulSoup(html_texto, 'html.parser')
+      def adicionar_html_ao_documento(documento, html_texto):
+            soup = BeautifulSoup(html_texto, 'html.parser')
 
-    for elemento in soup:
-        if elemento.name == 'p':
-            paragrafo = documento.add_paragraph()
-            adicionar_html_ao_paragrafo(paragrafo, elemento)
-        elif elemento.name == 'h1':
-            paragrafo = documento.add_paragraph()
-            run = paragrafo.add_run(elemento.text)
-            run.bold = True
-            run.font.size = Pt(24)
-        elif elemento.name == 'h2':
-            paragrafo = documento.add_paragraph()
-            run = paragrafo.add_run(elemento.text)
-            run.bold = True
-            run.font.size = Pt(20)
-        # Adicione mais elifs para outras tags HTML, se necessário
+            for elemento in soup:
+                if elemento.name == 'p':
+                    paragrafo = documento.add_paragraph()
+                    diagnostic.adicionar_html_ao_paragrafo(paragrafo, elemento)
+                elif elemento.name == 'h1':
+                    paragrafo = documento.add_paragraph()
+                    run = paragrafo.add_run(elemento.text)
+                    run.bold = True
+                    run.font.size = Pt(24)
+                elif elemento.name == 'h2':
+                    paragrafo = documento.add_paragraph()
+                    run = paragrafo.add_run(elemento.text)
+                    run.bold = True
+                    run.font.size = Pt(20)
+                # Adicione mais elifs para outras tags HTML, se necessário
 
-def adicionar_html_ao_paragrafo(paragrafo, elemento):
-    for subelemento in elemento:
-        if subelemento.name == 'strong':
-            run = paragrafo.add_run(subelemento.text)
-            run.bold = True
-        elif subelemento.name == 'em':
-            run = paragrafo.add_run(subelemento.text)
-            run.italic = True
-        else:
-            run = paragrafo.add_run(subelemento if isinstance(subelemento, str) else subelemento.text)
+      def adicionar_html_ao_paragrafo(paragrafo, elemento):
+            for subelemento in elemento:
+                if subelemento.name == 'strong':
+                    run = paragrafo.add_run(subelemento.text)
+                    run.bold = True
+                elif subelemento.name == 'em':
+                    run = paragrafo.add_run(subelemento.text)
+                    run.italic = True
+                else:
+                    run = paragrafo.add_run(subelemento if isinstance(subelemento, str) else subelemento.text)
 
 class debugger:
         def console_debugging_status(debug):
@@ -110,21 +111,34 @@ class api:
                     diagnostic_output = BytesIO()
                     df_normal.to_excel(normal_output, index=False)
                     df_anormal.to_excel(anormal_output, index=False)
-                    init.markdown_para_docx(relatorio, diagnostic_output)
+                    diagnostic.markdown_para_docx(relatorio, diagnostic_output)
 
+                    st.header("Faça o download do relatório")
+                    st.download_button("Download Relatorio", data= diagnostic_output.getvalue(),file_name='relatorio.docx')
+                    st.header("Arquivos Excel")
                     st.download_button("Download Normal File", data=normal_output.getvalue(), file_name='normal_file.xlsx') 
                     st.download_button("Download Anormal File", data=anormal_output.getvalue(), file_name='anormal_file.xlsx')
-                    st.download_button("Download Relatorio ", data= diagnostic_output.getvalue(),file_name='relatorio.docx')
                     print('Concluido')
 
 
 class webapp:
         def main(url):  
             st.set_page_config("Inia Desktop")
-            pdf = st.file_uploader("Faça seu upload aqui", type=['pdf'])
-            if pdf:
-                api.main(url, pdf)
-#st.download_button("Baixe o PDF")
+            st.title("Inia APP")
+            if pdf := st.file_uploader("Faça seu upload aqui", type=['pdf']):
+                for i in range(6):
+                    if i ==4:
+                         st.warning("Não foi possivel analisar o arquivo, tente novamente")
+                         break
+                    try:
+                        api.main(url, pdf)
+                    except:
+                         st.write("Ops! Ocorreu um erro inesperado, vamos demorar mais que o esperado")
+                         continue
+                    st.write("Obrigado por usar os recursos do INIA")
+                    break
+
+#Excecução das funções
 init.main()
 webapp.main(os.environ.get('INIA_API'))
 #class api, webapp
